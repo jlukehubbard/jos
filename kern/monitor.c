@@ -59,8 +59,29 @@ int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
 	// LAB 1: Your code here.
+	//Pushing a value into the stack involves decreasing the stack pointer and then writing the value to the place the stack pointer points to
+	//Poping a value from the stack involves reading the value the stack pointer points to and then increasing the stack pointer.
+
     // HINT 1: use read_ebp().
+	uint32_t ebp = read_ebp();
+	uint32_t *p = (uint32_t *)ebp;
+	int index;
+
+	cprintf*"Stack backtrace:\n");
+
+	while(*p)
+	{
+		cprintf(" ebp %08x eip %08x args", *p, *(p+2+index));
+
+		for(index = 0; index < 5; i++)
+		{
+			cprintf(" %08x", *(p+2+index));
+		}
+		cprintf("\n");
+		p = (uint32_t *) *p;
+	}
     // HINT 2: print the current ebp on the first line (not current_ebp[0])
+	
 	return 0;
 }
 
