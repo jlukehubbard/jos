@@ -76,7 +76,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	uint32_t *p = (uint32_t *)ebp;
 
 	//Print Header 
-	cprintf*"Stack backtrace:\n");
+	cprintf("Stack backtrace:\n");
 
 	//iterate through args 
 	while(p)
@@ -86,7 +86,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 		cprintf("  ebp %08x  eip %08x  args", p, *(p+1));
 
 		//iterate throught the args 
-		for(index = 0; index < 5; i++)
+		for(index = 0; index < 5; index++)
 		{
 			//print the args 
 			cprintf(" %08x", *(p+2+index));
