@@ -25,6 +25,7 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+	{ "backtrace", "Display function backtrace information", mon_backtrace },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -63,25 +64,45 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	//Poping a value from the stack involves reading the value the stack pointer points to and then increasing the stack pointer.
 
     // HINT 1: use read_ebp().
+	//variable declarations
+		//step 12 aditions
+	int index;
+	int length;
+	int offset;
+	char fileName = {0};
+	struct Eipdebuginfo info;
+		//step 11
 	uint32_t ebp = read_ebp();
 	uint32_t *p = (uint32_t *)ebp;
-	int index;
 
+	//Print Header 
 	cprintf*"Stack backtrace:\n");
 
-	while(*p)
+	//iterate through args 
+	while(p)
 	{
-		cprintf(" ebp %08x eip %08x args", *p, *(p+2+index));
+		//print ebp and eip 
+		// HINT 2: print the current ebp on the first line (not current_ebp[0])
+		cprintf("  ebp %08x  eip %08x  args", p, *(p+1));
 
+		//iterate throught the args 
 		for(index = 0; index < 5; i++)
 		{
+			//print the args 
 			cprintf(" %08x", *(p+2+index));
 		}
+		//move to new line 
 		cprintf("\n");
+
+			//step 12 aditions
+		debuginfo_eip(*(p+1), &info);
+
+		cprintf("         %s:%d: %.*s+%d\n", info.eip_file, info.eip_line, info.eip_fn_namelen, info.eip_fn_name, *(p+1) - info.eip_fn_addr );
+
+		//update p
 		p = (uint32_t *) *p;
 	}
-    // HINT 2: print the current ebp on the first line (not current_ebp[0])
-	
+	//return 0 when completed
 	return 0;
 }
 
