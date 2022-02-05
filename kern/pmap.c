@@ -150,7 +150,7 @@ mem_init(void)
 	// to initialize all fields of each struct PageInfo to 0.
 	// Your code goes here:
 	pages = boot_alloc(npages * sizeof(struct PageInfo));
-	memset(pages, 0, npages * sizeof(struct PageInfo));
+	memset(pages, '\0', npages * sizeof(struct PageInfo));
 
 	//////////////////////////////////////////////////////////////////////
 	// Now that we've allocated the initial kernel data structures, we set
@@ -253,12 +253,31 @@ page_init(void)
 	// Change the code to reflect this.
 	// NB: DO NOT actually touch the physical memory corresponding to
 	// free pages!
+
 	size_t i;
-	for (i = 0; i < npages; i++) {
-		pages[i].pp_ref = 0;
-		pages[i].pp_link = page_free_list;
-		page_free_list = &pages[i];
+
+	pages[0].pp_ref = 1;
+	pages[0].pp_link = NULL;
+
+	for (i = PGNUM(IOPHYSMEM); i < PGNUM(EXTPHYSMEM); i++) {
+		pages[i].pp_ref = 1;
+		pages[i].pp_link = NULL;
 	}
+
+	for (i = PGNUM(EXTPHYSMEM); i < PGNUM(boot_alloc(0)); i++) {
+		pages[i].pp_ref = 1;
+		pages[i].pp_link = NULL;
+	}
+
+
+	for (i = 0; i < npages; i++) {
+		if (pages[i].pp_ref == 0) {
+			pages[i].pp_link = page_free_list;
+			page_free_list = &pages[i];
+		}
+	}
+
+
 }
 
 //
@@ -274,11 +293,17 @@ page_init(void)
 //
 // Hint: use page2kva and memset
 struct PageInfo *
-page_alloc(int alloc_flags)
-{
+page_alloc(int alloc_flags) {
+
 	// Fill this function in
-	return 0;
-}
+	struct PageInfo *ret = page_free_list;
+	page_free_list = page_free_list -> pp_link;
+	ret -> pp_link = NULL;
+	if (alloc_flags & ALLOC_ZERO) {
+		memset(page2kva(ret), '\0', PGSIZE);
+	}
+	return ret;
+}	
 
 //
 // Return a page to the free list.
@@ -290,6 +315,13 @@ page_free(struct PageInfo *pp)
 	// Fill this function in
 	// Hint: You may want to panic if pp->pp_ref is nonzero or
 	// pp->pp_link is not NULL.
+	if (pp -> pp_ref)
+		panic("page_free: bad free, page still in use");
+	if (pp -> pp_link)
+		panic("page_free: double free, page was already in the freelist");
+
+	pp -> pp_link = page_free_list;
+	page_free_list = pp;
 }
 
 //
