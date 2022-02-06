@@ -102,11 +102,16 @@ boot_alloc(uint32_t n)
 	// to a multiple of PGSIZE.
 	//
 	// LAB 2: Your code here.
+	
+	if (n == 0)
+		return nextfree;
 	char *prev_nextfree, *new_nextfree;
 	new_nextfree = ROUNDUP(nextfree + n, PGSIZE);
 	prev_nextfree = nextfree;
 	nextfree = new_nextfree;
 
+	if (nextfree >= (char*) 0xf0400000) panic("boot_alloc: 4MB exceeded");
+	
 	return prev_nextfree;
 }
 
@@ -150,8 +155,9 @@ mem_init(void)
 	// to initialize all fields of each struct PageInfo to 0.
 	// Your code goes here:
 	pages = boot_alloc(npages * sizeof(struct PageInfo));
+	assert(pages);
 	memset(pages, '\0', npages * sizeof(struct PageInfo));
-
+	assert(pages[0].pp_ref == 0);
 	//////////////////////////////////////////////////////////////////////
 	// Now that we've allocated the initial kernel data structures, we set
 	// up the list of free physical pages. Once we've done so, all further
@@ -254,20 +260,24 @@ page_init(void)
 	// NB: DO NOT actually touch the physical memory corresponding to
 	// free pages!
 
-	size_t i;
+	size_t i = 0;
 
+	assert(pages);
 	pages[0].pp_ref = 1;
 	pages[0].pp_link = NULL;
 
-	for (i = PGNUM(IOPHYSMEM); i < PGNUM(EXTPHYSMEM); i++) {
+	for (i = PGNUM((void *) IOPHYSMEM); i < PGNUM((void *) EXTPHYSMEM); i++) {
 		pages[i].pp_ref = 1;
 		pages[i].pp_link = NULL;
 	}
-
-	for (i = PGNUM(EXTPHYSMEM); i < PGNUM(boot_alloc(0)); i++) {
+	
+	assert(boot_alloc(0));
+	
+	for (i = PGNUM((void *) EXTPHYSMEM); i < PGNUM(PADDR(boot_alloc(0))); i++) {
 		pages[i].pp_ref = 1;
 		pages[i].pp_link = NULL;
 	}
+	
 
 
 	for (i = 0; i < npages; i++) {
@@ -294,8 +304,8 @@ page_init(void)
 // Hint: use page2kva and memset
 struct PageInfo *
 page_alloc(int alloc_flags) {
-
 	// Fill this function in
+	if (!page_free_list) return NULL;
 	struct PageInfo *ret = page_free_list;
 	page_free_list = page_free_list -> pp_link;
 	ret -> pp_link = NULL;
