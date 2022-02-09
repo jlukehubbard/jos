@@ -371,13 +371,13 @@ pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	assert(pgdir);
-	pte_t *ret = pgdir[PDX(va)];
+	pte_t *ret = (pte_t *) pgdir[PDX(va)];
 	struct PageInfo *newPage = NULL;
 	if (!ret && create) newPage = page_alloc(ALLOC_ZERO);
 	if (newPage) {
 		newPage -> pp_ref += 1;
-		ret = page2pa(newPage);
-		pgdir[PDX(va)]
+		ret = (pte_t *) page2pa(newPage);
+		pgdir[PDX(va)] = (pde_t) ret;
 	}
 
 	return ret;
