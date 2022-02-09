@@ -372,12 +372,12 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	assert(pgdir);
 	pte_t *ret = (pte_t *) pgdir[PDX(va)];
-	struct PageInfo *newPage = NULL;
-	if (!ret && create) newPage = page_alloc(ALLOC_ZERO);
-	if (newPage) {
-		newPage -> pp_ref += 1;
-		ret = (pte_t *) page2pa(newPage);
-		pgdir[PDX(va)] = (pde_t) ret;
+	struct PageInfo *newTable = NULL;
+	if (!ret && create) newTable = page_alloc(ALLOC_ZERO);
+	if (newTable) {
+		newTable -> pp_ref += 1;
+		ret = (pte_t *) page2pa(newTable + PTX(va));
+		pgdir[PDX(va)] = (pde_t) newTable;
 	}
 
 	return ret;
@@ -397,7 +397,11 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 static void
 boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
 {
-	// Fill this function in
+	pte_t *new_pte = NULL;
+	for (size_t i = 0; i < size; i += PGSIZE) {
+		new_pte = pgdir_walk(pgdir, (void *) (va + (uintptr_t) i), 1);
+		*new_pte = PTE_ADDR(pa + i) | PTE_P | perm;
+	}
 }
 
 //
@@ -428,7 +432,7 @@ boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm
 int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
-	// Fill this function in
+	
 	return 0;
 }
 
@@ -446,7 +450,7 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
-	// Fill this function in
+	
 	return NULL;
 }
 
