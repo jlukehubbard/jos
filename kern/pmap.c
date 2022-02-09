@@ -370,8 +370,17 @@ page_decref(struct PageInfo* pp)
 pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
-	// Fill this function in
-	return NULL;
+	assert(pgdir);
+	pte_t *ret = pgdir[PDX(va)];
+	struct PageInfo *newPage = NULL;
+	if (!ret && create) newPage = page_alloc(ALLOC_ZERO);
+	if (newPage) {
+		newPage -> pp_ref += 1;
+		ret = page2pa(newPage);
+		pgdir[PDX(va)]
+	}
+
+	return ret;
 }
 
 //
