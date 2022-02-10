@@ -180,6 +180,7 @@ mem_init(void)
 	//      (ie. perm = PTE_U | PTE_P)
 	//    - pages itself -- kernel RW, user NONE
 	// Your code goes here:
+	boot_map_region(kern_pgdir, UPAGES, PTSIZE, PADDR(pages), PTE_U);
 
 	//////////////////////////////////////////////////////////////////////
 	// Use the physical memory that 'bootstack' refers to as the kernel
@@ -192,6 +193,7 @@ mem_init(void)
 	//       overwrite memory.  Known as a "guard page".
 	//     Permissions: kernel RW, user NONE
 	// Your code goes here:
+	boot_map_region(kern_pgdir, KSTACKTOP-KSTKSIZE, KSTKSIZE, PADDR(bootstack), PTE_W);
 
 	//////////////////////////////////////////////////////////////////////
 	// Map all of physical memory at KERNBASE.
@@ -201,6 +203,7 @@ mem_init(void)
 	// we just set up the mapping anyway.
 	// Permissions: kernel RW, user NONE
 	// Your code goes here:
+	boot_map_region(kern_pgdir, KERNBASE, 0xffffffff - KERNBASE, 0, PTE_W);
 
 	// Check that the initial page directory has been set up correctly.
 	check_kern_pgdir();
@@ -432,7 +435,17 @@ boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm
 int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
-	
+
+	pte_t *p_pte = pgdir_walk(pgdir, va, 1);
+	//check for table allocation and return failure
+	if(p_pte == NULL) return -E_NO_MEM;
+	//pp->pp_ref should be incremented if the insertion succeeds
+	pp->pp_ref++;
+	//If there is already a page mapped at 'va', it should be page_remove()d.
+	if((*p_pte) & PTE_P) page_remove(pgdir, va);
+	*p_pte = PTE_ADDR(page2pa(pp)) | perm | PTE_P;
+	pgdir[PDX(va)] |= perm;
+	//return upon success
 	return 0;
 }
 
@@ -450,8 +463,10 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
-	
-	return NULL;
+	pte_t *new_pte = pgdir_walk(pgdir, va, 0);
+	if((new_pte == NULL)|| (!(*new_pte) & PTE_P)) return NULL;
+	if(pte_store != NULL) *pte_store = new_pte;
+	return pa2page(PTE_ADDR(*p_pte));
 }
 
 //
@@ -473,6 +488,12 @@ void
 page_remove(pde_t *pgdir, void *va)
 {
 	// Fill this function in
+	pte_t *p_pte;
+	struct PageInfo *pp = page_lookup(pgdir, va, &p_pte);
+	if(pp == NULL) return;
+	page_decref(pp);
+	*p_pte = 0;
+	tlb_invalidate(pgdir, va);
 }
 
 //
