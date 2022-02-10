@@ -373,19 +373,35 @@ page_decref(struct PageInfo* pp)
 pte_t *
 pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
+	size_t i = PDX(va);
+	pde_t* entry = &pgdir[i];
+	pte* new_pte;
+	if(!(*entry & PTE_P))
+	{
+		if(!(create)) return NULL;
+		struct PageInfo* new_table = page_alloc(ALLOC_ZERO);
+		if(!new_table) return NULL;
+
+		*entry = page2pa(new_table) | PTE_P | PTE_W | PTE_U;
+		new_table->pp_ref++
+		new_pte = (pte_t*) KADDR(page2pa((struct PageInfo*) new_table));
+	}
+	else new_pte = KADDR(PTE_ADDR(*entry));
+	return &new_pte[PTX(va)];
+
+	/*
 	assert(pgdir);
-	pde_t ret = pgdir[PDX(va)];
+	pte_t *ret = (pte_t *) pgdir[PDX(va)];
 	struct PageInfo *newTable = NULL;
-	if (!(ret & PTE_P)) {
-		if (create) {
-			newTable = page_alloc(ALLOC_ZERO);
-			newTable -> pp_ref += 1;
-			ret = page2pa(newTable + PTX(va));
-			pgdir[PDX(va)] = (pde_t) PGADDR(PDX(newTable), PTX(newTable), PTE_P);
-		} else return NULL;
+	if (!ret && create) newTable = page_alloc(ALLOC_ZERO);
+	if (newTable) {
+		newTable -> pp_ref += 1;
+		ret = (pte_t *) page2pa(newTable + PTX(va));
+		pgdir[PDX(va)] = (pde_t) newTable;
 	}
 
-	return (pte_t *) ret;
+	return ret;
+	*/
 }
 
 //
