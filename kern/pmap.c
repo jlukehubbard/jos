@@ -475,7 +475,7 @@ struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
 	pte_t* new_pte = pgdir_walk(pgdir, va, 0);
-	if((new_pte == NULL) return NULL;
+	if(new_pte == NULL) return NULL;
 	if(pte_store != NULL) *pte_store = new_pte;
 	return (struct PageInfo*) pa2page(PTE_ADDR(*new_pte));
 }
@@ -770,7 +770,9 @@ check_page(void)
 
 	// free pp0 and try again: pp0 should be used for page table
 	page_free(pp0);
+	cprintf("before\n");
 	assert(page_insert(kern_pgdir, pp1, 0x0, PTE_W) == 0);
+	cprintf("after\n");
 	assert(PTE_ADDR(kern_pgdir[0]) == page2pa(pp0));
 	assert(check_va2pa(kern_pgdir, 0x0) == page2pa(pp1));
 	assert(pp1->pp_ref == 1);
