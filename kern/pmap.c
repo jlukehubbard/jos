@@ -375,7 +375,7 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 {
 	size_t i = PDX(va);
 	pde_t* entry = &pgdir[i];
-	pte* new_pte;
+	pte_t* new_pte;
 	if(!(*entry & PTE_P))
 	{
 		if(!(create)) return NULL;
@@ -383,11 +383,11 @@ pgdir_walk(pde_t *pgdir, const void *va, int create)
 		if(!new_table) return NULL;
 
 		*entry = page2pa(new_table) | PTE_P | PTE_W | PTE_U;
-		new_table->pp_ref++
+		new_table->pp_ref++;
 		new_pte = (pte_t*) KADDR(page2pa((struct PageInfo*) new_table));
 	}
 	else new_pte = KADDR(PTE_ADDR(*entry));
-	return &new_pte[PTX(va)];
+	return new_pte + PTX(va);
 
 	/*
 	assert(pgdir);
@@ -784,11 +784,9 @@ check_page(void)
 	// there is no page allocated at address 0
 	assert(page_lookup(kern_pgdir, (void *) 0x0, &ptep) == NULL);
 
-	cprintf("before\n");
 	// there is no free memory, so we can't allocate a page table
 	assert(page_insert(kern_pgdir, pp1, 0x0, PTE_W) < 0);
 
-	cprintf("after\n");
 	// free pp0 and try again: pp0 should be used for page table
 	page_free(pp0);
 	assert(page_insert(kern_pgdir, pp1, 0x0, PTE_W) == 0);
