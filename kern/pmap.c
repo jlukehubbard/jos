@@ -439,22 +439,6 @@ int
 page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
 
-<<<<<<< HEAD
-	pte_t *p_pte = pgdir_walk(pgdir, va, 0);
-	//If there is already a page mapped at 'va', it should be page_remove()d.
-	if((*p_pte) & PTE_P) {
-		page_remove(pgdir, va);
-	}
-	pgdir_walk(pgdir, va, 1);
-	//check for table allocation and return failure
-	if(!p_pte) return -E_NO_MEM;
-	assert(p_pte);
-	//pp->pp_ref should be incremented if the insertion succeeds
-	pp->pp_ref++;
-	assert(p_pte);
-	//PGOFF() also can be used to extract the permissions
-	*p_pte = PTE_ADDR(page2pa(pp)) | PGOFF(perm | PTE_P);
-=======
 	pte_t *p_pte = pgdir_walk(pgdir, va, 1);
 	physaddr_t ppPhysical = page2pa(pp);
 	//check for table allocation and return failure
@@ -473,7 +457,6 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 	//pp->pp_ref should be incremented if the insertion succeeds
 	pp->pp_ref++;
 	*p_pte = PTE_ADDR(page2pa(pp)) | perm | PTE_P;
->>>>>>> bugfix
 	pgdir[PDX(va)] |= perm;
 	//return upon success
 	return 0;
@@ -493,17 +476,11 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 struct PageInfo *
 page_lookup(pde_t *pgdir, void *va, pte_t **pte_store)
 {
-<<<<<<< HEAD
-	pte_t *new_pte = pgdir_walk(pgdir, va, 0);
-	if((new_pte == NULL) || !((*new_pte) & PTE_P)) return NULL;
-	if(pte_store) *pte_store = new_pte;
-	return pa2page(*new_pte);
-=======
+
 	pte_t* new_pte = pgdir_walk(pgdir, va, 0);
 	if(new_pte == NULL) return NULL;
 	if(pte_store != NULL) *pte_store = new_pte;
 	return (struct PageInfo*) pa2page(PTE_ADDR(*new_pte));
->>>>>>> bugfix
 }
 
 //
