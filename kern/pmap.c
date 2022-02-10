@@ -768,14 +768,14 @@ check_page(void)
 	// there is no page allocated at address 0
 	assert(page_lookup(kern_pgdir, (void *) 0x0, &ptep) == NULL);
 
+	cprintf("before\n");
 	// there is no free memory, so we can't allocate a page table
 	assert(page_insert(kern_pgdir, pp1, 0x0, PTE_W) < 0);
 
+	cprintf("after\n");
 	// free pp0 and try again: pp0 should be used for page table
 	page_free(pp0);
-	cprintf("before\n");
 	assert(page_insert(kern_pgdir, pp1, 0x0, PTE_W) == 0);
-	cprintf("after\n");
 	assert(PTE_ADDR(kern_pgdir[0]) == page2pa(pp0));
 	assert(check_va2pa(kern_pgdir, 0x0) == page2pa(pp1));
 	assert(pp1->pp_ref == 1);
