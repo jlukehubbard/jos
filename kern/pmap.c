@@ -403,6 +403,7 @@ boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm
 	pte_t *new_pte = NULL;
 	for (size_t i = 0; i < size; i += PGSIZE) {
 		new_pte = pgdir_walk(pgdir, (void *) (va + (uintptr_t) i), 1);
+		if(new_pte == NULL) return;
 		*new_pte = PTE_ADDR(pa + i) | PTE_P | perm;
 	}
 }
@@ -437,12 +438,22 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 {
 
 	pte_t *p_pte = pgdir_walk(pgdir, va, 1);
+	physaddr_t ppPhysical = page2pa(pp);
 	//check for table allocation and return failure
 	if(p_pte == NULL) return -E_NO_MEM;
+
+	if(*p_pte & PTE_P)
+	{
+		if(PTE_ADDR(*p_pte) == ppPhysical)
+		{
+			*p_pte = PTE_ADDR(page2pa(pp)) | perm | PTE_P;
+			return 0;
+		}
+		tlb_invalidate(pgdir, va);
+		page_remove(pgdir, va);
+	}
 	//pp->pp_ref should be incremented if the insertion succeeds
 	pp->pp_ref++;
-	//If there is already a page mapped at 'va', it should be page_remove()d.
-	if((*p_pte) & PTE_P) page_remove(pgdir, va);
 	*p_pte = PTE_ADDR(page2pa(pp)) | perm | PTE_P;
 	pgdir[PDX(va)] |= perm;
 	//return upon success
@@ -490,7 +501,7 @@ page_remove(pde_t *pgdir, void *va)
 	// Fill this function in
 	pte_t *p_pte;
 	struct PageInfo *pp = page_lookup(pgdir, va, &p_pte);
-	if(pp == NULL) return;
+	if(pp == NULL || (!(*p_pte) & PTE_P)) return;
 	page_decref(pp);
 	*p_pte = 0;
 	tlb_invalidate(pgdir, va);
