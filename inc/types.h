@@ -9,6 +9,8 @@
 typedef _Bool bool;
 enum { false, true };
 
+#define BOOL(x) x ? 0 : 1
+
 // Explicitly-sized versions of integer types
 typedef __signed char int8_t;
 typedef unsigned char uint8_t;

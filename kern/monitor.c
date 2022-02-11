@@ -10,6 +10,7 @@
 #include <kern/console.h>
 #include <kern/monitor.h>
 #include <kern/kdebug.h>
+#include <kern/pmap.h>
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -26,6 +27,9 @@ static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
 	{ "backtrace", "Display function backtrace information", mon_backtrace },
+	{ "showmappings", "Display physical page mappings and their permissions in the current address space", mon_showmappings },
+	{ "pgmod", "Modify permissions of active page mappings", mon_pgmod },
+	{ "dump", "Dump memory in the specified range", mon_dump },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -106,6 +110,52 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	return 0;
 }
 
+int mon_showmappings(int argc, char **argv, struct Trapframe *tf) {
+	uintptr_t lo = 0, hi = 0, curr;
+	bool pte_p, pte_w, pte_u, pte_avail;
+	if (argc == 2) {
+		lo = strtol(argv[1], NULL, 16);
+		hi = lo + PGSIZE;
+	} else if (argc == 3) {
+		lo = strtol(argv[1], NULL, 16);
+		hi = strtol(argv[2], NULL, 16);
+	} else {
+		cprintf("showmappings: please provide an address range [0xlow, 0xhigh) in the form:\n	showmappings 0x<low> 0x<high>\nor a single address:\n	showmappings 0x<low>\n");
+	}
+
+	//adjust hi, lo to fit page boundaries
+	lo = ROUNDUP(lo - PGSIZE + 1, PGSIZE);
+	hi = ROUNDUP(hi - PGSIZE + 1, PGSIZE);
+
+	cprintf("Physical mappings for virtual address range 0x%lx-0x%lx\n", lo, hi);
+
+	assert(kern_pgdir);
+	for (size_t i = lo; i < hi; i += PGSIZE) {
+		curr = (uintptr_t) pgdir_walk(kern_pgdir, (void *) i, 0);
+		if (curr) {
+			pte_p = BOOL(curr & PTE_P);
+			pte_w = BOOL(curr & PTE_W);
+			pte_u = BOOL(curr & PTE_U);
+		} else {
+			pte_p = false;
+			pte_w = false;
+			pte_u = false;
+		}
+
+		cprintf("%lx -> %lx, PTE_P: %d, PTE_W: %d, PTE_U: %d\n", i, curr, pte_p, pte_w, pte_u);
+	}
+
+
+	return 0;
+}
+
+int mon_pgmod(int argc, char **argv, struct Trapframe *tf) {
+	return 0;
+}
+
+int mon_dump(int argc, char **argv, struct Trapframe *tf) {
+	return 0;
+}
 
 
 /***** Kernel monitor command interpreter *****/
