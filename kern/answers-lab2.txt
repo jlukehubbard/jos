@@ -10,7 +10,17 @@ a. What entries (rows) in the page directory have been filled in at this point? 
     +-----+----------------------+---------------------------------------+
     |.    | ?                    | ?                                     |
     +-----+----------------------+---------------------------------------+
+    |.    | 0xF0000000           | KERNBASE, KSTACKTOP                   |
+    +-----+----------------------+---------------------------------------+
     |.    | ?                    | ?                                     |
+    +-----+----------------------+---------------------------------------+
+    |.    | 0xEF800000           | ULIM                                  |
+    +-----+----------------------+---------------------------------------+
+    |.    | 0xEF400000           | UVPT                                  |
+    +-----+----------------------+---------------------------------------+
+    |.    | 0xEF000000           | UPAGES                                |
+    +-----+----------------------+---------------------------------------+
+    |.    | 0xEEC00000           | UTOP                                  |
     +-----+----------------------+---------------------------------------+
     |.    | ?                    | ?                                     |
     +-----+----------------------+---------------------------------------+
@@ -18,17 +28,16 @@ a. What entries (rows) in the page directory have been filled in at this point? 
     +-----+----------------------+---------------------------------------+
     |1    | 0x00400000           | UTEMP                                 |
     +-----+----------------------+---------------------------------------+
-    |0    | 0x00000000           | [see next question]                   |
+    |0    | 0x00000000           | 0x00000000                            |
     +-----+----------------------+---------------------------------------+
 b. We have placed the kernel and user environment in the same address space. Why will user programs not be able to read or write the kernel’s memory? What specific mechanisms protect the kernel memory?
 The user programs will not be able to read or write the kernel's memory as permissions are set on each individual page in order to prevent reading or writing when not desired. These permissions are set throught the use of flags, specificaly PTE_W, to set as writable, and PTE_U to set as user readable. This results in memory segmentation into groups where the kernel only can access, both kernel and user programs can read, and finally user programs can read and write.
 
 
 c. What is the maximum amount of physical memory that this operating system can support? Why?
-4096 kB for directory table
-Each PageInfo instance is 8 bytes meaning the maximun number of pages is (4096*1024)/8 = 524,288 bytes
-Each page is 4096 bytes
-524,288 * 4096 = 2.147e9 or around 2Gb.
+4 kB for directory table
+1024 page tables in the directory, each one points to 1024 pages of physical memory of 4kb each 
+	-> 4 kb.page-1 * 1024 pg.ptable-1 * 1024 ptable.pdir-1 * 1 pdir = 4 Gb of physical memory
 
 d. How much space overhead is there for managing memory, if we actually had the maximum amount of physical memory? How is this overhead broken down?
 PageInfo: 4Mbytes
@@ -38,3 +47,5 @@ Total Space: 4Mbytes + 4Kbytes
 
 
 e. Revisit the page table setup in kern/entry.S and kern/entrypgdir.c. Immediately after we turn on paging, EIP is still a low number (a little over 1MB). At what point do we transition to running at an EIP above KERNBASE? What makes it possible for us to continue executing at a low EIP between when we enable paging and when we begin running at an EIP above KERNBASE? Why is this transition necessary?
+
+	The transition to EIP being above KERNBASE happens at the jmp to relocated. The reason we're able to run at an EIP below KERNBASE after paging is enabled is that in kern/entrypgdir.c there we establish a mapping from virtual addresses [0, 4Mb) to physical addresses [0, 4MB). This is in addition to the mapping of virtual addresses [KERNBASE, KERNBASE + 4MB) to the same physical memory. This transition is necessary to facilitate easy context switching later.
