@@ -28,7 +28,7 @@ static struct Command commands[] = {
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
 	{ "backtrace", "Display function backtrace information", mon_backtrace },
 	{ "showmappings", "Display physical page mappings and their permissions in the current address space", mon_showmappings },
-	{ "pgmod", "Modify permissions of active page mappings", mon_pgmod },
+	{ "mapmod", "Add, remove, and modify permissions of memory mappings", mon_mapmod },
 	{ "dump", "Dump memory in the specified range", mon_dump },
 };
 
@@ -142,14 +142,14 @@ int mon_showmappings(int argc, char **argv, struct Trapframe *tf) {
 			pte_u = false;
 		}
 
-		cprintf("%lx -> %lx, PTE_P: %d, PTE_W: %d, PTE_U: %d\n", i, curr, pte_p, pte_w, pte_u);
+		cprintf("0x%08.8lx -> 0x%08.8lx, PTE_P: %1.d, PTE_W: %1.d, PTE_U: %1.d\n", i & ~0xfff, (*(pte_t *) curr) & ~0xfff, pte_p, pte_w, pte_u);
 	}
 
 
 	return 0;
 }
 
-int mon_pgmod(int argc, char **argv, struct Trapframe *tf) {
+int mon_mapmod(int argc, char **argv, struct Trapframe *tf) {
 	return 0;
 }
 
