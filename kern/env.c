@@ -117,9 +117,9 @@ env_init(void)
 	// Set up envs array
 	// LAB 3: Your code here.
 	for (size_t i = 1; i <= NENV; i++) {
-		envs[i-1] -> env_status = ENV_FREE;
-		envs[i-1] -> env_id = 0;
-		envs[NENV - i] -> env_link = env_free_list;
+		envs[i-1].env_status = ENV_FREE;
+		envs[i-1].env_id = 0;
+		envs[NENV - i].env_link = env_free_list;
 		env_free_list = &envs[NENV - i];
 	}
 
@@ -185,49 +185,8 @@ env_setup_vm(struct Env *e)
 	//    - The functions in kern/pmap.h are handy.
 
 	// LAB 3: Your code here.
-
-	//////////////////////////////////////////////////////////////////////
-        // Map 'pages' read-only by the user at linear address UPAGES
-        // Permissions:
-        //    - the new image at UPAGES -- kernel R, user R
-        //      (ie. perm = PTE_U | PTE_P)
-        //    - pages itself -- kernel RW, user NONE
-        // Your code goes here:
-        boot_map_region(env_pgdir, UPAGES, PTSIZE, PADDR(pages), PTE_U | PTE_P);
-
-        //////////////////////////////////////////////////////////////////////
-        // Map the 'envs' array read-only by the user at linear address UENVS
-        // (ie. perm = PTE_U | PTE_P).
-        // Permissions:
-        //    - the new image at UENVS  -- kernel R, user R
-        //    - envs itself -- kernel RW, user NONE
-        // LAB 3: Your code here.
-        boot_map_region(env_pgdir, UENVS, NENV * sizeof(struct Env), PADDR(envs), PTE_U | PTE_P);
-
-        //////////////////////////////////////////////////////////////////////
-        // Use the physical memory that 'bootstack' refers to as the kernel
-        // stack.  The kernel stack grows down from virtual address KSTACKTOP.
-        // We consider the entire range from [KSTACKTOP-PTSIZE, KSTACKTOP)
-        // to be the kernel stack, but break this into two pieces:
-        //     * [KSTACKTOP-KSTKSIZE, KSTACKTOP) -- backed by physical memory
-        //     * [KSTACKTOP-PTSIZE, KSTACKTOP-KSTKSIZE) -- not backed; so if
-        //       the kernel overflows its stack, it will fault rather than
-        //       overwrite memory.  Known as a "guard page".
-        //     Permissions: kernel RW, user NONE
-        // Your code goes here:
-        boot_map_region(env_pgdir, KSTACKTOP-KSTKSIZE, KSTKSIZE, PADDR(bootstack), PTE_W);
-
-        //////////////////////////////////////////////////////////////////////
-        // Map all of physical memory at KERNBASE.
-        // Ie.  the VA range [KERNBASE, 2^32) should map to
-        //      the PA range [0, 2^32 - KERNBASE)
-        // We might not have 2^32 - KERNBASE bytes of physical memory, but
-        // we just set up the mapping anyway.
-        // Permissions: kernel RW, user NONE
-        // Your code goes here:
-        boot_map_region(env_pgdir, KERNBASE, 0xffffffff - KERNBASE, 0, PTE_W);
-
-
+	for (size_t i = PDX(UTOP); i < NPDENTRIES; i++) e->env_pgdir[i] = kern_pgdir[i];
+	
 	// UVPT maps the env's own page table read-only.
 	// Permissions: kernel R, user R
 	e->env_pgdir[PDX(UVPT)] = PADDR(e->env_pgdir) | PTE_P | PTE_U;
@@ -315,6 +274,8 @@ region_alloc(struct Env *e, void *va, size_t len)
 	//   'va' and 'len' values that are not page-aligned.
 	//   You should round va down, and round (va + len) up.
 	//   (Watch out for corner-cases!)
+	
+
 }
 
 //
