@@ -191,6 +191,8 @@ env_setup_vm(struct Env *e)
 	// Permissions: kernel R, user R
 	e->env_pgdir[PDX(UVPT)] = PADDR(e->env_pgdir) | PTE_P | PTE_U;
 
+	p -> pp_ref++;
+
 	return 0;
 }
 
