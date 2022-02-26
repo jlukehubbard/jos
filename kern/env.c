@@ -277,6 +277,14 @@ region_alloc(struct Env *e, void *va, size_t len)
 	//   You should round va down, and round (va + len) up.
 	//   (Watch out for corner-cases!)
 	
+	struct PageInfo *nextpp;
+
+	for (size_t i = ROUNDDOWN((uintptr_t) va, PGSIZE); i < ROUNDUP((uintptr_t) va + len, PGSIZE); i += PGSIZE) {
+		nextpp = page_lookup(e -> env_pgdir, (void *) i, NULL);
+		if (!nextpp) nextpp = page_alloc(~ALLOC_ZERO);
+		if (!nextpp) panic("region_alloc: ran out of free physical pages");
+		page_insert(e -> env_pgdir, nextpp, (void *) i, PTE_P | PTE_U | PTE_W);
+	}
 
 }
 
@@ -334,11 +342,33 @@ load_icode(struct Env *e, uint8_t *binary)
 	//  What?  (See env_run() and env_pop_tf() below.)
 
 	// LAB 3: Your code here.
+	
+	// Switch to virtual memory space of the environment
+	uintptr_t prev_cr3 = rcr3();
+	lcr3(PADDR(e -> env_pgdir));
 
+	struct Elf *elf = (struct Elf *) binary;
+
+	// Is this a valid ELF header?
+	if (elf -> e_magic != ELF_MAGIC) panic("load_icode: Bad ELF header");
+
+	struct Proghdr *currph = (struct Proghdr *) ((uint32_t) elf + elf->e_phoff);
+	struct Proghdr *endph = currph + elf->e_phnum;
+
+	for(; (currph < endph) && (currph->p_type == ELF_PROG_LOAD); currph++) {
+		region_alloc(e, (void *) currph->p_va, currph->p_memsz);
+		memcpy((void *) currph->p_va, binary + currph->p_offset, currph->p_filesz);
+		memset((void *) (currph->p_va + currph->p_filesz), '\0', currph->p_va + (currph->p_memsz - currph->p_filesz));
+	}
+
+	e->env_tf.tf_eip = elf->e_entry;
 	// Now map one page for the program's initial stack
 	// at virtual address USTACKTOP - PGSIZE.
-
 	// LAB 3: Your code here.
+	region_alloc(e, (void *) USTACKTOP-PGSIZE, PGSIZE);
+
+	//restore previous pgdir
+	lcr3(prev_cr3);
 }
 
 //
@@ -352,6 +382,7 @@ void
 env_create(uint8_t *binary, enum EnvType type)
 {
 	// LAB 3: Your code here.
+	
 }
 
 //
