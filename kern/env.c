@@ -185,6 +185,7 @@ env_setup_vm(struct Env *e)
 	//    - The functions in kern/pmap.h are handy.
 
 	// LAB 3: Your code here.
+	e->env_pgdir = (pde_t *) page2kva(p);
 	for (size_t i = PDX(UTOP); i < NPDENTRIES; i++) e->env_pgdir[i] = kern_pgdir[i];
 	
 	// UVPT maps the env's own page table read-only.
@@ -358,7 +359,7 @@ load_icode(struct Env *e, uint8_t *binary)
 	for(; (currph < endph) && (currph->p_type == ELF_PROG_LOAD); currph++) {
 		region_alloc(e, (void *) currph->p_va, currph->p_memsz);
 		memcpy((void *) currph->p_va, binary + currph->p_offset, currph->p_filesz);
-		memset((void *) (currph->p_va + currph->p_filesz), '\0', currph->p_va + (currph->p_memsz - currph->p_filesz));
+		memset((void *) (currph->p_va + currph->p_filesz), '\0', currph->p_memsz - currph->p_filesz);
 	}
 
 	e->env_tf.tf_eip = elf->e_entry;
@@ -382,7 +383,11 @@ void
 env_create(uint8_t *binary, enum EnvType type)
 {
 	// LAB 3: Your code here.
-	
+	struct Env *e;
+
+	env_alloc(&e, 0);
+	load_icode(e, binary);
+	e -> env_type = ENV_RUNNABLE;
 }
 
 //
@@ -493,12 +498,23 @@ env_run(struct Env *e)
 	//	   registers and drop into user mode in the
 	//	   environment.
 
+	// If this is a context switch
+	if (curenv) {
+		if (curenv->env_type == (enum EnvType) ENV_RUNNING) curenv -> env_type = ENV_RUNNABLE;
+	}
+	curenv = e;
+	curenv->env_type = ENV_RUNNING;
+	curenv->env_runs++;
+	lcr3(PADDR(curenv->env_pgdir));
+
+
 	// Hint: This function loads the new environment's state from
 	//	e->env_tf.  Go back through the code you wrote above
 	//	and make sure you have set the relevant parts of
 	//	e->env_tf to sensible values.
 
 	// LAB 3: Your code here.
+	env_pop_tf(&(curenv->env_tf));
 
 	panic("env_run not yet implemented");
 }
