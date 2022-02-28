@@ -29,8 +29,7 @@ static struct Command commands[] = {
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
 	{ "backtrace", "Display function backtrace information", mon_backtrace },
 	{ "showmappings", "Display physical page mappings and their permissions in the current address space", mon_showmappings },
-	{ "mapmod", "Add, remove, and modify permissions of memory mappings", mon_mapmod },
-	{ "dump", "Dump memory in the specified range", mon_dump },
+	{ "si", "step through a single instruction", mon_si },
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -150,11 +149,10 @@ int mon_showmappings(int argc, char **argv, struct Trapframe *tf) {
 	return 0;
 }
 
-int mon_mapmod(int argc, char **argv, struct Trapframe *tf) {
-	return 0;
-}
-
-int mon_dump(int argc, char **argv, struct Trapframe *tf) {
+int mon_si(int argc, char **argv, struct Trapframe *tf) {
+	uint32_t eflags = read_eflags();
+	eflags |= FL_TF;
+	write_eflags(eflags);
 	return 0;
 }
 
