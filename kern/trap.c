@@ -104,7 +104,7 @@ trap_init(void)
 	SETGATE(idt[T_DIVIDE], 0, GD_KT, t_divide, 0);
 	SETGATE(idt[T_DEBUG], 0, GD_KT, t_debug, 0);
 	SETGATE(idt[T_NMI], 0, GD_KT, t_nmi, 0);
-	SETGATE(idt[T_BRKPT], 0, GD_KT, t_brkpt, 0);
+	SETGATE(idt[T_BRKPT], 0, GD_KT, t_brkpt, 3);
 	SETGATE(idt[T_OFLOW], 0, GD_KT, t_oflow, 0);
 	SETGATE(idt[T_BOUND], 0, GD_KT, t_bound, 0);
 	SETGATE(idt[T_ILLOP], 0, GD_KT, t_illop, 0);
@@ -122,7 +122,7 @@ trap_init(void)
 	SETGATE(idt[T_MCHK], 0, GD_KT, t_mchk, 0);
 	SETGATE(idt[T_SIMDERR], 0, GD_KT, t_simderr, 0);
 	
-	SETGATE(idt[T_SYSCALL], 0, GD_KT, t_syscall, 0);
+	SETGATE(idt[T_SYSCALL], 0, GD_KT, t_syscall, 3);
 	SETGATE(idt[T_DEFAULT], 0, GD_KT, t_default, 0);
 	// Per-CPU setup
 	trap_init_percpu();
