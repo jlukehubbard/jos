@@ -585,9 +585,16 @@ user_mem_check(struct Env *env, const void *va, size_t len, int perm)
 	{
 		pte_t *pte = pgdir_walk(env->env_pgdir, (void *)start, 0);
 
-		if(start >= ULIM || pte == NULL || !(*pte & PTE_P) || (*pte & perm) != perm)
+		if(pte == NULL || start >= ULIM  || !(*pte & PTE_P) || (*pte & perm) != perm)
 		{
-			user_mem_check_addr = (start < address) ? address : start;
+			if(start < address)
+			{
+				user_mem_check_addr = address;
+			}
+			else
+			{
+				user_mem_check_addr = start;
+			}
 			return -E_FAULT;
 		}
 		start = start + PGSIZE;
