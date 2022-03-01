@@ -209,7 +209,8 @@ trap_dispatch(struct Trapframe *tf)
 {
 	// Handle processor exceptions.
 	// LAB 3: Your code here.
-//ex5
+	
+	//ex5
 	switch (tf->tf_trapno) {
 	case T_PGFLT:
 		page_fault_handler(tf);
@@ -222,7 +223,8 @@ trap_dispatch(struct Trapframe *tf)
 
 	//ex7
 	case T_SYSCALL:
-		tf->tf_regs.reg_eax = syscall(tf->tf_regs.reg_eax, tf->tf_regs.reg_edx, tf->tf_regs.reg_ecx, tf->tf_regs.reg_ebx, tf->tf_regs.reg_edi, tf->tf_regs.reg_esi);
+		int32_t tmp = syscall(tf->tf_regs.reg_eax, tf->tf_regs.reg_edx, tf->tf_regs.reg_ecx, tf->tf_regs.reg_ebx, tf->tf_regs.reg_edi, tf->tf_regs.reg_esi);
+		tf->tf_regs.reg_eax = tmp;
 		return;
 	}
 	// Unexpected trap: The user process or the kernel has a bug.
@@ -286,8 +288,9 @@ page_fault_handler(struct Trapframe *tf)
 	// Handle kernel-mode page faults.
 
 	// LAB 3: Your code here.
+
 	//ex 9
-	if((tf->tf_cs & 0x3) == 0)
+	if(((tf->tf_cs) & (0x3)) == 0)
 	{
 		panic("page faullt in kernel mode");
 	}
