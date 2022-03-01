@@ -223,9 +223,9 @@ trap_dispatch(struct Trapframe *tf)
 
 	//ex7
 	case T_SYSCALL:
-		int32_t tmp = syscall(tf->tf_regs.reg_eax, tf->tf_regs.reg_edx, tf->tf_regs.reg_ecx, tf->tf_regs.reg_ebx, tf->tf_regs.reg_edi, tf->tf_regs.reg_esi);
+		{ int32_t tmp = syscall(tf->tf_regs.reg_eax, tf->tf_regs.reg_edx, tf->tf_regs.reg_ecx, tf->tf_regs.reg_ebx, tf->tf_regs.reg_edi, tf->tf_regs.reg_esi);
 		tf->tf_regs.reg_eax = tmp;
-		return;
+		return; } //Brackets need to be here to placate GCC
 	}
 	// Unexpected trap: The user process or the kernel has a bug.
 	print_trapframe(tf);
