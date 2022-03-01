@@ -387,7 +387,7 @@ env_create(uint8_t *binary, enum EnvType type)
 
 	env_alloc(&e, 0);
 	load_icode(e, binary);
-	e -> env_type = ENV_RUNNABLE;
+	e -> env_type = ENV_TYPE_USER;
 }
 
 //
@@ -500,10 +500,10 @@ env_run(struct Env *e)
 
 	// If this is a context switch
 	if (curenv) {
-		if (curenv->env_type == (enum EnvType) ENV_RUNNING) curenv -> env_type = ENV_RUNNABLE;
+		if (curenv->env_status == (enum EnvType) ENV_RUNNING) curenv -> env_status = ENV_RUNNABLE;
 	}
 	curenv = e;
-	curenv->env_type = ENV_RUNNING;
+	curenv->env_status = ENV_RUNNING;
 	curenv->env_runs++;
 	lcr3(PADDR(curenv->env_pgdir));
 
