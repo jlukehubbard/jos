@@ -331,6 +331,8 @@ page_init(void)
 		pages[i].pp_ref = 1;
 		pages[i].pp_link = NULL;
 	}
+
+	pages[PGNUM((void *) MPENTRY_PADDR)].pp_ref = 1;
 	
 
 
