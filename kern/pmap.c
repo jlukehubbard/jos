@@ -274,6 +274,10 @@ mem_init_mp(void)
 	//     Permissions: kernel RW, user NONE
 	//
 	// LAB 4: Your code here:
+	
+	for (size_t i = 0; i < NCPU; i++) {
+		boot_map_region(kern_pgdir, KSTACKTOP - (i * (KSTKSIZE + KSTKGAP)) - KSTKSIZE, KSTKSIZE, PADDR(&percpu_kstacks[i]), PTE_W);
+	}
 
 }
 
@@ -625,7 +629,7 @@ mmio_map_region(physaddr_t pa, size_t size)
 	//boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
 	uintptr_t pa_start, pa_end, pa_off, pa_sz, va_start;
 	pa_start = ROUNDDOWN(pa, PGSIZE);
-	pa_end = ROUNDUP(pa, PGSIZE);
+	pa_end = ROUNDUP(pa + size, PGSIZE);
 	if (pa_end >= (uintptr_t) MMIOLIM) panic("mmio_map_region: Requested physical address range extends past MMIOLIM");
 	pa_sz = pa_end - pa_start;
 	pa_off = pa & 0xfff;
