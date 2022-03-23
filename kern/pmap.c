@@ -619,7 +619,23 @@ mmio_map_region(physaddr_t pa, size_t size)
 	// Hint: The staff solution uses boot_map_region.
 	//
 	// Your code here:
-	panic("mmio_map_region not implemented");
+	
+	//boot_map_region(pde_t *pgdir, uintptr_t va, size_t size, physaddr_t pa, int perm)
+	uintptr_t pa_start, pa_end, pa_off, pa_sz, va_start;
+	pa_start = ROUNDDOWN(pa, PGSIZE);
+	pa_end = ROUNDUP(pa, PGSIZE);
+	if (pa_end >= (uintptr_t) MMIOLIM) panic("mmio_map_region: Requested physical address range extends past MMIOLIM");
+	pa_sz = pa_end - pa_start;
+	pa_off = pa & 0xfff;
+	va_start = base;
+	base = va_start + pa_sz;
+	int pte_perms = PTE_W | PTE_PCD | PTE_PWT;
+
+	boot_map_region(kern_pgdir, va_start, pa_sz, pa_start, pte_perms);
+
+	return (void *) (va_start + pa_off);
+	
+	//panic("mmio_map_region not implemented");
 }
 
 static uintptr_t user_mem_check_addr;
