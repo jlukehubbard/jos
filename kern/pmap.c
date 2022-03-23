@@ -630,12 +630,16 @@ mmio_map_region(physaddr_t pa, size_t size)
 	uintptr_t pa_start, pa_end, pa_off, pa_sz, va_start;
 	pa_start = ROUNDDOWN(pa, PGSIZE);
 	pa_end = ROUNDUP(pa + size, PGSIZE);
-	if (pa_end >= (uintptr_t) MMIOLIM) panic("mmio_map_region: Requested physical address range extends past MMIOLIM");
 	pa_sz = pa_end - pa_start;
 	pa_off = pa & 0xfff;
 	va_start = base;
 	base = va_start + pa_sz;
 	int pte_perms = PTE_W | PTE_PCD | PTE_PWT;
+	
+	if (base > (uintptr_t) MMIOLIM) {
+		base = va_start;
+		panic("mmio_map_region: Requested physical address range extends past MMIOLIM");
+	}
 
 	boot_map_region(kern_pgdir, va_start, pa_sz, pa_start, pte_perms);
 
