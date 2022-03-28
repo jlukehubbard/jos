@@ -93,6 +93,9 @@ void t_simderr();
 void t_syscall();
 void t_default();
 
+void irq_error();
+void irq_timer();
+
 void
 trap_init(void)
 {
@@ -182,7 +185,7 @@ trap_init_percpu(void)
 
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
-	thiscpu->cpu_ts.ts_esp0 = KSTACKTOP - thiscpu->cpu_id *(KSTKKSIZE + KSTKGAP);
+	thiscpu->cpu_ts.ts_esp0 = KSTACKTOP - thiscpu->cpu_id *(KSTKSIZE + KSTKGAP);
 	thiscpu->cpu_ts.ts_ss0 = GD_KD;
 	thiscpu->cpu_ts.ts_iomb = sizeof(struct Taskstate);
 
@@ -434,7 +437,7 @@ page_fault_handler(struct Trapframe *tf)
 	utf->utf_esp = tf->tf_esp;
 
 	curenv->env_tf.tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
-	curenv->env_tf.tf_esp = (uintptr)utf;
+	curenv->env_tf.tf_esp = (uintptr_t)utf;
 
 	env_run(curenv);
 	
