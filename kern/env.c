@@ -120,8 +120,8 @@ env_init(void)
 	// Set up envs array
 	// LAB 3: Your code here.
 	for (size_t i = 1; i <= NENV; i++) {
-		envs[i-1].env_status = ENV_FREE;
-		envs[i-1].env_id = 0;
+		envs[NENV - i].env_status = ENV_FREE;
+		envs[NENV - i].env_id = 0;
 		envs[NENV - i].env_link = env_free_list;
 		env_free_list = &envs[NENV - i];
 	}
@@ -369,7 +369,7 @@ load_icode(struct Env *e, uint8_t *binary)
 	struct Proghdr *currph = (struct Proghdr *) ((uint32_t) elf + elf->e_phoff);
 	struct Proghdr *endph = currph + elf->e_phnum;
 
-	for(; (currph < endph) && (currph->p_type == ELF_PROG_LOAD); currph++) {
+	for(; (currph <= endph) && (currph->p_type == ELF_PROG_LOAD); currph++) {
 		region_alloc(e, (void *) currph->p_va, currph->p_memsz);
 		memcpy((void *) currph->p_va, binary + currph->p_offset, currph->p_filesz);
 		memset((void *) (currph->p_va + currph->p_filesz), '\0', currph->p_memsz - currph->p_filesz);

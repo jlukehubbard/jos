@@ -12,7 +12,7 @@ void
 sched_yield(void)
 {
 	struct Env *idle;
-	envid_t idx;
+	envid_t id;
 
 	// Implement simple round-robin scheduling.
 	//
@@ -31,21 +31,22 @@ sched_yield(void)
 
 	// LAB 4: Your code here.
 	
-	if (curenv) {
-		idx = (ENVX(curenv -> env_id) + 1) % NENV;
-	} else {
-		idx = 0;
-	}
+	curenv ? (id = curenv -> env_id) : (id = -1);
 
-	size_t i = idx, cnt = 0;
-	while (cnt <= NENV) {
-		if (envs[i].env_status == ENV_RUNNABLE) {
-			env_run(envs + i);
+	for (size_t i = 1; i <= NENV; i++) {
+		if (envs[(ENVX(id) + i) % NENV].env_status == ENV_RUNNABLE) {
+			env_run(envs + ((ENVX(id) + i) % NENV));
+			break;
 		}
 
-		cnt++;
-		i = (i + 1) % NENV;
+		
+		if (i == NENV && envs[(ENVX(id) + i) % NENV].env_status == ENV_RUNNING) {
+			env_run(envs + ((ENVX(id) + i) % NENV));
+			break;
+		}
+		
 	}
+
 
 
 
