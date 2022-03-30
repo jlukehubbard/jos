@@ -181,11 +181,10 @@ trap_init_percpu(void)
 	// user space on that CPU.
 	//
 	// LAB 4: Your code here:
-	struct Taskstate *cpu_ts = &thiscpu->cpu_ts;
 
 	// Setup a TSS so that we get the right stack
 	// when we trap to the kernel.
-	thiscpu->cpu_ts.ts_esp0 = KSTACKTOP - thiscpu->cpu_id *(KSTKSIZE + KSTKGAP);
+	thiscpu->cpu_ts.ts_esp0 = KSTACKTOP - (cpunum() * (KSTKSIZE + KSTKGAP));
 	thiscpu->cpu_ts.ts_ss0 = GD_KD;
 	thiscpu->cpu_ts.ts_iomb = sizeof(struct Taskstate);
 
@@ -376,7 +375,7 @@ page_fault_handler(struct Trapframe *tf)
 	//ex 9
 	if(((tf->tf_cs) & (0x3)) == 0)
 	{
-		panic("page faullt in kernel mode");
+		panic("page fault in kernel mode");
 	}
 	
 	
@@ -413,7 +412,7 @@ page_fault_handler(struct Trapframe *tf)
 	//   (the 'tf' variable points at 'curenv->env_tf').
 
 	// LAB 4: Your code here.
-	if(!curenv->env_pgfault_upcall)
+	if(!(curenv->env_pgfault_upcall))
 	{
 		cprintf("no page fault upcall: envid: %x \n", curenv->env_id);
 		goto exit;
@@ -426,7 +425,6 @@ page_fault_handler(struct Trapframe *tf)
 		tftop = tf->tf_esp -4;
 	}
 	struct UTrapframe *utf = (struct UTrapframe *)(tftop - sizeof(struct UTrapframe));
-
 	user_mem_assert(curenv, utf, sizeof(struct UTrapframe), PTE_U | PTE_W);
 
 	utf->utf_fault_va = fault_va;
@@ -436,9 +434,10 @@ page_fault_handler(struct Trapframe *tf)
 	utf->utf_eflags = tf->tf_eflags;
 	utf->utf_esp = tf->tf_esp;
 
-	curenv->env_tf.tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
-	curenv->env_tf.tf_esp = (uintptr_t)utf;
-
+	tf -> tf_eip = (uintptr_t)curenv->env_pgfault_upcall;
+	tf -> tf_esp = (uintptr_t)utf;
+	
+	//cprintf("kern/trap.c: page_fault_handler: running environment [%8d]\n", (int) (curenv -> env_id));
 	env_run(curenv);
 	
 

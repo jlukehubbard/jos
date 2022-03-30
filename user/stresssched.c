@@ -25,8 +25,10 @@ umain(int argc, char **argv)
 	// Check that one environment doesn't run on two CPUs at once
 	for (i = 0; i < 10; i++) {
 		sys_yield();
-		for (j = 0; j < 10000; j++)
+		for (j = 0; j < 10000; j++) {
+			cprintf("First write to COW\n");
 			counter++;
+		}
 	}
 
 	if (counter != 10*10000)

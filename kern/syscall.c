@@ -178,7 +178,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 	// LAB 4: Your code here.
 	
 	if ((perm & 0xfff) & (~PTE_SYSCALL)) return -E_INVAL;
-	if ((uintptr_t) va & 0xfff) return -E_INVAL;
+	if ((uintptr_t) va & 0xfff || (uintptr_t) va >= UTOP) return -E_INVAL;
 
 	struct Env *e;
 	int r = envid2env(envid, &e, 1);
@@ -193,7 +193,6 @@ sys_page_alloc(envid_t envid, void *va, int perm)
 
 	return 0;
 
-	panic("sys_page_alloc not implemented");
 }
 
 // Map the page of memory at 'srcva' in srcenvid's address space
@@ -323,7 +322,15 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
 	if ((uintptr_t) srcva < UTOP && ((uintptr_t) target -> env_ipc_dstva < UTOP)) {
 		r = sys_page_map(curenv -> env_id, srcva, envid, target -> env_ipc_dstva, perm);
 		if (r) return r;
-	}
+		//    env_ipc_perm is set to 'perm' if a page was transferred, 0 otherwise.
+		target -> env_ipc_perm = perm;	
+	} else  target -> env_ipc_perm = 0;
+	//    env_ipc_recving is set to 0 to block future sends;
+	target -> env_ipc_recving;
+	//    env_ipc_from is set to the sending envid;
+	target -> env_ipc_from = curenv -> env_id;
+	//    env_ipc_value is set to the 'value' parameter;
+	target -> env_ipc_value = value;
 
 	return 0;
 
@@ -350,6 +357,7 @@ sys_ipc_recv(void *dstva)
 	if ((uintptr_t) dstva < UTOP && (uintptr_t) dstva & 0xfff) return -E_INVAL;
 	curenv -> env_ipc_recving = 1;
 	curenv -> env_ipc_dstva = dstva;
+	curenv -> env_status = ENV_NOT_RUNNABLE;
 	sched_yield();
 	//panic("sys_ipc_recv not implemented");
 	return 0;

@@ -25,12 +25,14 @@ pgfault(struct UTrapframe *utf)
 	//   (see <inc/memlayout.h>).
 
 	// LAB 4: Your code here.
+	if(!(err & 2)) {
+		panic("pgfault was not a write. %e", err);
+	}
 	pte_t pte = uvpt[(uintptr_t)addr >> PGSHIFT];
 	if(!(pte & PTE_COW)) {
 		panic("pgfault was not a copy on write");
-	} else if(!(err & 2)) {
-		panic("pgfault was not a write. %x", err);
 	}
+
 
 	// Allocate a new page, map it at a temporary location (PFTEMP),
 	// copy the data from the old page to the new page, then move the new

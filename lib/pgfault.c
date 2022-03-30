@@ -33,7 +33,7 @@ set_pgfault_handler(void (*handler)(struct UTrapframe *utf))
 		int error = sys_page_alloc(0, (void *)(UXSTACKTOP - PGSIZE), PTE_W | PTE_U);
 		if(error < 0)
 		{
-			panic("%e", error);
+			panic("set_pgfault_handler: %e\n", error);
 		}
 		sys_env_set_pgfault_upcall(0, _pgfault_upcall);
 	}
