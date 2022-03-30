@@ -64,13 +64,20 @@ _pgfault_upcall:
 	// may find that you have to rearrange your code in non-obvious
 	// ways as registers become unavailable as scratch space.
 	//
+
+	
 	// LAB 4: Your code here.
-	movl 40(%esp), %eax
-	movl 48(%esp), %ebx
-	subl $4, %ebx
-	movl %ebx, 48(%esp)
-	mov %eax, (%ebx)
-	addl $8, %esp
+	//movl 40(%esp), %eax
+	//movl 48(%esp), %ebx
+	//subl $4, %ebx
+	//movl %ebx, 48(%esp)
+	//mov %eax, (%ebx)
+	//addl $8, %esp
+	movl 0x28(%esp), %edx
+	subl $0x4, 0x30(%esp)
+	movl 0x30(%esp), %eax
+	movl %edx, (%eax)
+	addl $0x8, %esp
 
 	// Restore the trap-time registers.  After you do this, you
 	// can no longer modify any general-purpose registers.
@@ -91,3 +98,10 @@ _pgfault_upcall:
 	// Return to re-execute the instruction that faulted.
 	// LAB 4: Your code here.
 	ret
+	
+
+
+
+
+
+

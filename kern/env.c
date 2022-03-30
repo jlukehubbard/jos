@@ -371,8 +371,8 @@ load_icode(struct Env *e, uint8_t *binary)
 
 	for(; (currph <= endph) && (currph->p_type == ELF_PROG_LOAD); currph++) {
 		region_alloc(e, (void *) currph->p_va, currph->p_memsz);
+		memset((void *) currph->p_va, '\0', currph->p_memsz);
 		memcpy((void *) currph->p_va, binary + currph->p_offset, currph->p_filesz);
-		memset((void *) (currph->p_va + currph->p_filesz), '\0', currph->p_memsz - currph->p_filesz);
 	}
 
 	e->env_tf.tf_eip = elf->e_entry;

@@ -25,7 +25,7 @@ pgfault(struct UTrapframe *utf)
 	//   (see <inc/memlayout.h>).
 
 	// LAB 4: Your code here.
-	if(!(err & 2)) {
+	if(!(err & FEC_WR)) {
 		panic("pgfault was not a write. %e", err);
 	}
 	pte_t pte = uvpt[(uintptr_t)addr >> PGSHIFT];

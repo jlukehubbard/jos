@@ -412,7 +412,7 @@ page_fault_handler(struct Trapframe *tf)
 	//   (the 'tf' variable points at 'curenv->env_tf').
 
 	// LAB 4: Your code here.
-	if(!(curenv->env_pgfault_upcall))
+	if (!curenv->env_pgfault_upcall)
 	{
 		cprintf("no page fault upcall: envid: %x \n", curenv->env_id);
 		goto exit;
@@ -425,7 +425,7 @@ page_fault_handler(struct Trapframe *tf)
 		tftop = tf->tf_esp -4;
 	}
 	struct UTrapframe *utf = (struct UTrapframe *)(tftop - sizeof(struct UTrapframe));
-	user_mem_assert(curenv, utf, sizeof(struct UTrapframe), PTE_U | PTE_W);
+	user_mem_assert(curenv, (void *) utf, sizeof(struct UTrapframe), PTE_U | PTE_W);
 
 	utf->utf_fault_va = fault_va;
 	utf->utf_err = tf->tf_err;

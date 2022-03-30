@@ -276,7 +276,7 @@ mem_init_mp(void)
 	// LAB 4: Your code here:
 	
 	for (size_t i = 0; i < NCPU; i++) {
-		boot_map_region(kern_pgdir, KSTACKTOP - (i * (KSTKSIZE + KSTKGAP)) - KSTKSIZE, KSTKSIZE, PADDR(&percpu_kstacks[i]), PTE_W);
+		boot_map_region(kern_pgdir, KSTACKTOP - (i * (KSTKSIZE + KSTKGAP)) - KSTKSIZE, KSTKSIZE, PADDR(percpu_kstacks[i]), PTE_W);
 	}
 
 }
@@ -365,7 +365,9 @@ page_init(void)
 struct PageInfo *
 page_alloc(int alloc_flags) {
 	// Fill this function in
-	if (!page_free_list) return NULL;
+	if (!page_free_list) {
+		return NULL;
+	}
 	struct PageInfo *ret = page_free_list;
 	page_free_list = page_free_list -> pp_link;
 	ret -> pp_link = NULL;
@@ -513,7 +515,10 @@ page_insert(pde_t *pgdir, struct PageInfo *pp, void *va, int perm)
 	pte_t *p_pte = pgdir_walk(pgdir, va, 1);
 	physaddr_t ppPhysical = page2pa(pp);
 	//check for table allocation and return failure
-	if(p_pte == NULL) return -E_NO_MEM;
+	if(p_pte == NULL) {
+		//warn("page_insert: page table not mapped, pgdir_walk returned NULL\n");
+		return -E_NO_MEM;
+	}
 
 	if(*p_pte & PTE_P)
 	{

@@ -9,6 +9,7 @@ umain(int argc, char **argv)
 	int seen;
 	envid_t parent = sys_getenvid();
 
+
 	// Fork several environments
 	for (i = 0; i < 20; i++)
 		if (fork() == 0)
@@ -26,7 +27,6 @@ umain(int argc, char **argv)
 	for (i = 0; i < 10; i++) {
 		sys_yield();
 		for (j = 0; j < 10000; j++) {
-			cprintf("First write to COW\n");
 			counter++;
 		}
 	}
