@@ -89,6 +89,12 @@ _pgfault_upcall:
 	//subl $4, 48(%ebx)
 	//movl %esp, %eax
 	//movl %ebx, (%eax)
+	
+//last test case uses popfl most likly to work
+	//movl 0x28(%esp), %eax
+	//subl $0x4, 0x30(%esp)
+	//movl 0x30(%esp), %ebx
+	//movl %eax, (%ebx)
 
 	// Restore the trap-time registers.  After you do this, you
 	// can no longer modify any general-purpose registers.
