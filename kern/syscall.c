@@ -24,7 +24,10 @@ sys_cputs(const char *s, size_t len)
 	// LAB 3: Your code here.
 
 	//ex7
-	user_mem_assert(curenv, s, len, PTE_U);
+	if(curenv->env_tf.tf_cs & 3)
+	{
+		user_mem_assert(curenv, s, len, PTE_U);
+	}
 
 	// Print the string supplied by the user.
 	cprintf("%.*s", len, s);
@@ -377,7 +380,7 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 	switch (syscallno) 
 	{
 		case SYS_cputs:
-			sys_cputs((const char*) a1,(size_t) a2);
+			sys_cputs((char*) a1,(size_t) a2);
 			return 0;
 		case SYS_cgetc:
 			return sys_cgetc();
@@ -409,5 +412,6 @@ syscall(uint32_t syscallno, uint32_t a1, uint32_t a2, uint32_t a3, uint32_t a4, 
 	}
 	return 0;
 }
+
 
 
