@@ -72,16 +72,28 @@ _pgfault_upcall:
 	//subl $4, %ebx
 	//movl %ebx, 48(%esp)
 	//mov %eax, (%ebx)
-	//addl $8, %esp
+
+	//movl 0x28(%esp), %edx
+	//subl $0x4, 0x30(%esp)
+	//movl 0x30(%esp), %eax
+	//movl %edx, (%eax)
+
+	movl 0x30(%esp), %ecx 
+	subl $4, %ecx
+	movl %ecx, 0x30(%esp)
 	movl 0x28(%esp), %edx
-	subl $0x4, 0x30(%esp)
-	movl 0x30(%esp), %eax
-	movl %edx, (%eax)
-	addl $0x8, %esp
+	movl %edx, (%ecx)
+
+//Test second use popf with 
+	//movl 40(%esp), %ebx
+	//subl $4, 48(%ebx)
+	//movl %esp, %eax
+	//movl %ebx, (%eax)
 
 	// Restore the trap-time registers.  After you do this, you
 	// can no longer modify any general-purpose registers.
 	// LAB 4: Your code here.
+	addl $0x8, %esp
 	popal
 
 	// Restore eflags from the stack.  After you do this, you can
@@ -90,6 +102,9 @@ _pgfault_upcall:
 	// LAB 4: Your code here.
 	addl $4, %esp
 	popfl
+
+//USE with the second test 
+	//popf
 
 	// Switch back to the adjusted trap-time stack.
 	// LAB 4: Your code here.
