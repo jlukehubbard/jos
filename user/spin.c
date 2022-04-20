@@ -25,7 +25,11 @@ umain(int argc, char **argv)
 	sys_yield();
 	sys_yield();
 
+<<<<<<< HEAD
 	cprintf("I am the parent.  Killing the child...\n");
+=======
+    cprintf("I am the parent.  Killing the child...\n");
+>>>>>>> lab4soln
 	sys_env_destroy(env);
 }
 

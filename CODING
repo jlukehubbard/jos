@@ -15,6 +15,11 @@ We have the following conventions in our code:
 
 * Function names are all lower-case separated by underscores.
 
+<<<<<<< HEAD
+=======
+* Beginning-of-line indentation via tabs, not spaces.
+
+>>>>>>> lab4soln
 * Preprocessor macros are always UPPERCASE.
   There are a few grandfathered exceptions: assert, panic,
   static_assert, offsetof.
