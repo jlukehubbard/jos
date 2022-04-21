@@ -68,10 +68,10 @@ duppage(envid_t envid, unsigned pn)
 {
 	int r;
 
-	// LAB 4: Your code here.
+    // LAB 4: Your code here.
     int perm = PTE_U | PTE_P;
     pte_t pte = uvpt[pn];
-    if ( (pte & PTE_W) || (pte & PTE_COW) ) {
+    if ( ((pte & PTE_W) || (pte & PTE_COW)) && !(pte & PTE_SHARE)) {
         perm |= PTE_COW;
     }
 
