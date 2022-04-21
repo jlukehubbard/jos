@@ -9,7 +9,6 @@ readline(const char *prompt)
 {
 	int i, c, echoing;
 
-<<<<<<< HEAD
 #if JOS_KERNEL
 	if (prompt != NULL)
 		cprintf("%s", prompt);
@@ -17,22 +16,14 @@ readline(const char *prompt)
 	if (prompt != NULL)
 		fprintf(1, "%s", prompt);
 #endif
-=======
-	if (prompt != NULL)
-		cprintf("%s", prompt);
->>>>>>> lab4soln
 
 	i = 0;
 	echoing = iscons(0);
 	while (1) {
 		c = getchar();
 		if (c < 0) {
-<<<<<<< HEAD
 			if (c != -E_EOF)
 				cprintf("read error: %e\n", c);
-=======
-			cprintf("read error: %e\n", c);
->>>>>>> lab4soln
 			return NULL;
 		} else if ((c == '\b' || c == '\x7f') && i > 0) {
 			if (echoing)

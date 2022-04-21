@@ -28,7 +28,6 @@ static const char * const error_string[MAXERROR] =
 	[E_FAULT]	= "segmentation fault",
 	[E_IPC_NOT_RECV]= "env is not recving",
 	[E_EOF]		= "unexpected end of file",
-<<<<<<< HEAD
 	[E_NO_DISK]	= "no free space on disk",
 	[E_MAX_OPEN]	= "too many files are open",
 	[E_NOT_FOUND]	= "file or block not found",
@@ -36,8 +35,6 @@ static const char * const error_string[MAXERROR] =
 	[E_FILE_EXISTS]	= "file already exists",
 	[E_NOT_EXEC]	= "file is not a valid executable",
 	[E_NOT_SUPP]	= "operation not supported",
-=======
->>>>>>> lab4soln
 };
 
 /*
@@ -217,18 +214,10 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 		// (unsigned) octal
 		case 'o':
-<<<<<<< HEAD
-			// LAB 1: Replace this with your code.
-			putch('X', putdat);
-			putch('X', putdat);
-			putch('X', putdat);
-			break;
-=======
 			// Replace this with your code.
 			num = getint(&ap, lflag);
             base = 8;
             goto number;
->>>>>>> lab4soln
 
 		// pointer
 		case 'p':

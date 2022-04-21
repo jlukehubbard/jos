@@ -23,20 +23,14 @@ umain(int argc, char **argv)
 
 		memcpy(TEMP_ADDR_CHILD, str2, strlen(str2) + 1);
 		ipc_send(who, 0, TEMP_ADDR_CHILD, PTE_P | PTE_W | PTE_U);
-<<<<<<< HEAD
-=======
         cprintf("child sent\n");
->>>>>>> lab4soln
 		return;
 	}
 
 	// Parent
 	sys_page_alloc(thisenv->env_id, TEMP_ADDR, PTE_P | PTE_W | PTE_U);
 	memcpy(TEMP_ADDR, str1, strlen(str1) + 1);
-<<<<<<< HEAD
-=======
     cprintf("parent sent\n");
->>>>>>> lab4soln
 	ipc_send(who, 0, TEMP_ADDR, PTE_P | PTE_W | PTE_U);
 
 	ipc_recv(&who, TEMP_ADDR, 0);
