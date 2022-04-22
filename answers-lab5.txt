@@ -1,0 +1,2 @@
+1.
+No, all you have to do is set the correct value in the IOPL field of the EFLAGS register in that environment's env_tf. The context switching code from previous labs automatically handles the process of saving ad restoring the task state for every environment, including the IOPL.
