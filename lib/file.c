@@ -146,7 +146,7 @@ devfile_write(struct Fd *fd, const void *buf, size_t n)
 	n = n > size_max ? size_max : n;
 	fsipcbuf.write.req_fileid = fd->fd_file.id;
 	fsipcbuf.write.req_n = n;
-	memmove(fsipcbuf.write.req_buf, but, n);
+	memmove(fsipcbuf.write.req_buf, buf, n);
 	return fsipc(FSREQ_WRITE, NULL);
 }
 

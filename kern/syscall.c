@@ -149,7 +149,7 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 	// Remember to check whether the user has supplied us with a good
 	// address!
 	//panic("sys_env_set_trapframe not implemented");
-	struct ENV *e;
+	struct Env *e;
 	int x;
 	if(x = envid2env(envid, &e, 1))
 	{

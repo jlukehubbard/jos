@@ -305,7 +305,7 @@ copy_shared_pages(envid_t child)
 	uintptr_t x;
 	for(x = 0; x < USTACKTOP; x += PGSIZE)
 	{
-		if((uvpd[PDX(x)] & PTE_P) && (uvpt[PGNUM(x)] & PTE_P) (uvpt[PGNUM(x)] & PTE_U) && (uvpt[PGNUM(x)] & PTE_SHARE))
+		if((uvpd[PDX(x)] & PTE_P) && (uvpt[PGNUM(x)] & PTE_P) && (uvpt[PGNUM(x)] & PTE_U) && (uvpt[PGNUM(x)] & PTE_SHARE))
 		{
 			sys_page_map(0, (void *)x, child, (void *) x, (uvpt[PGNUM(x)] & PTE_SYSCALL));
 		}
