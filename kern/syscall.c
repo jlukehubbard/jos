@@ -461,6 +461,7 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
                     dstenv->env_ipc_dstva, perm) < 0) {
             return -E_NO_MEM;
         }
+	dstenv->env_ipc_perm = perm;
     }
     //cprintf("Setting the value %d\n", value);
     dstenv->env_ipc_value = value;
