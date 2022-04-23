@@ -251,6 +251,7 @@ serve_write(envid_t envid, struct Fsreq_write *req)
 		}
 		return x;
 	}
+	return -1;
 }
 
 // Stat ipc->stat.req_fileid.  Return the file's struct Stat to the

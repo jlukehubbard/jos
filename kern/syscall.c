@@ -151,13 +151,23 @@ sys_env_set_trapframe(envid_t envid, struct Trapframe *tf)
 	//panic("sys_env_set_trapframe not implemented");
 	struct Env *e;
 	int x;
-	if(x = envid2env(envid, &e, 1))
+	if((x = envid2env(envid, &e, 1)) != 0)
 	{
 		return x;
 	}
+	/*
 	tf->tf_eip |= 0x3;
 	tf->tf_eflags |= FL_IF;
 	e->env_tf = *tf;
+	*/
+
+	e->env_tf = *tf;
+	e->env_tf.tf_eflags &= ~FL_IOPL_MASK;
+	e->env_tf.tf_eflags |= FL_IF;
+	e->env_tf.tf_ds = GD_UD | 3;
+	e->env_tf.tf_es = GD_UD | 3;
+	e->env_tf.tf_ss = GD_UD | 3;
+	e->env_tf.tf_cs = GD_UT | 3;
 	return 0;
 }
 
@@ -234,6 +244,11 @@ sys_page_alloc(envid_t envid, void *va, int perm)
         return -E_INVAL;
     }
 
+    if (PGOFF(va)) return -E_INVAL;
+
+    if (!(perm & PTE_SYSCALL)) return -E_INVAL;
+
+    /*
     if (!(PTE_U & perm)) {
         return -E_INVAL;
     }
@@ -241,6 +256,7 @@ sys_page_alloc(envid_t envid, void *va, int perm)
     if (!(PTE_P & perm)) {
         return -E_INVAL;
     }
+    */
 
     struct PageInfo *pp = page_alloc(ALLOC_ZERO);
     if (pp == NULL) {
@@ -435,11 +451,13 @@ sys_ipc_try_send(envid_t envid, uint32_t value, void *srcva, unsigned perm)
         if (va & 0xfff) {
             return -E_INVAL;
         }
-
+	
+	/*
         uint32_t perm_check = ~(PTE_U | PTE_P | PTE_W);
         if (perm & perm_check) {
             return -E_INVAL;
         }
+	*/
 
         // get pte
         pp = page_lookup(curenv->env_pgdir, srcva, &pte);

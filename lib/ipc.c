@@ -25,7 +25,7 @@ ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
 	// LAB 4: Your code here.
 	//panic("ipc_recv not implemented");
     int32_t ret;
-    if ( (ret = sys_ipc_recv(pg == NULL ? (void*)-1 : pg)) < 0) {
+    if ( (ret = sys_ipc_recv(pg == NULL ? (void*)KERNBASE : pg)) < 0) {
         return ret;
     }
 

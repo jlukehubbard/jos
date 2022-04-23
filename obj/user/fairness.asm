@@ -2158,9 +2158,9 @@ ipc_recv(envid_t *from_env_store, void *pg, int *perm_store)
 	// LAB 4: Your code here.
 	//panic("ipc_recv not implemented");
     int32_t ret;
-    if ( (ret = sys_ipc_recv(pg == NULL ? (void*)-1 : pg)) < 0) {
+    if ( (ret = sys_ipc_recv(pg == NULL ? (void*)KERNBASE : pg)) < 0) {
   800e1a:	85 c0                	test   %eax,%eax
-  800e1c:	ba ff ff ff ff       	mov    $0xffffffff,%edx
+  800e1c:	ba 00 00 00 f0       	mov    $0xf0000000,%edx
   800e21:	0f 44 c2             	cmove  %edx,%eax
   800e24:	83 ec 0c             	sub    $0xc,%esp
   800e27:	50                   	push   %eax

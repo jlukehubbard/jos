@@ -88,9 +88,9 @@ flush_block(void *addr)
 	void *round = ROUNDDOWN(addr, PGSIZE);
 	pte_t pte = uvpt[PGNUM(round)];
 
-	if (r = ide_write(blockno * BLKSECTS, round, BLKSECTS)) panic("in flush_block, ide_write: %e", r);
+	if ((r = ide_write(blockno * BLKSECTS, round, BLKSECTS) < 0)) panic("in flush_block, ide_write: %e", r);
 
-	if (r = sys_page_map(0, round, 0, round, pte & PTE_SYSCALL)) panic("in flush_block, sys_page_map: %e", r);
+	if ((r = sys_page_map(0, round, 0, round, pte & PTE_SYSCALL)) < 0) panic("in flush_block, sys_page_map: %e", r);
 
 }
 
