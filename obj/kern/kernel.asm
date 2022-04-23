@@ -222,7 +222,7 @@ f010019f:	e8 1b 33 00 00       	call   f01034bf <env_create>
 	ENV_CREATE(TEST, ENV_TYPE_USER);
 f01001a4:	83 c4 08             	add    $0x8,%esp
 f01001a7:	6a 00                	push   $0x0
-f01001a9:	68 f0 d2 26 f0       	push   $0xf026d2f0
+f01001a9:	68 a8 02 30 f0       	push   $0xf03002a8
 f01001ae:	e8 0c 33 00 00       	call   f01034bf <env_create>
 	kbd_intr();
 f01001b3:	e8 45 04 00 00       	call   f01005fd <kbd_intr>
